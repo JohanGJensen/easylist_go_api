@@ -2,6 +2,7 @@ package routes
 
 import (
 	"example/web-service-gin/mongodb"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -34,5 +35,5 @@ func Init() {
 	InitSpacesRoutes(router)
 	InitItemsRoutes(router)
 
-	router.Run("localhost:8080")
+	router.Run(os.Getenv("HOST"))
 }
