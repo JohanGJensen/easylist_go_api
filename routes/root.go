@@ -2,7 +2,9 @@ package routes
 
 import (
 	"example/web-service-gin/mongodb"
+	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -28,6 +30,12 @@ type Message struct {
 
 func Init() {
 	router := gin.Default()
+
+	// setting cors origin rules
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{os.Getenv("HOST")}
+	router.Use(cors.New(config))
+
 	router.GET("/health", CheckHealth)
 
 	// initialize all the routes

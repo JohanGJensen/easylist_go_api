@@ -14,7 +14,9 @@ import (
 // initialize all item routes
 func InitItemsRoutes(router *gin.Engine) {
 	router.POST("/items/create/:spaceid", createItem)
+	router.POST("/items/update/:spaceid/:itemid", updateItem)
 	router.DELETE("/items/delete/all/:spaceid", deleteAllItems)
+	router.DELETE("/items/delete/:spaceid/:itemid", deleteItem)
 }
 
 func createItem(c *gin.Context) {
@@ -33,7 +35,7 @@ func createItem(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	response, err := spacesCollection.UpdateOne(
+	spacesCollection.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$push",
@@ -44,11 +46,7 @@ func createItem(c *gin.Context) {
 		opts,
 	)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	c.IndentedJSON(http.StatusOK, response)
+	c.IndentedJSON(http.StatusOK, newItem)
 }
 
 func deleteAllItems(c *gin.Context) {
@@ -72,4 +70,64 @@ func deleteAllItems(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, response)
+}
+
+func deleteItem(c *gin.Context) {
+	spaceid := c.Param("spaceid")
+	itemid := c.Param("itemid")
+
+	opts := options.Update().SetUpsert(false)
+	filter := bson.D{{Key: "id", Value: spaceid}}
+
+	// insert space into mongodb
+	response, err := spacesCollection.UpdateOne(
+		context.Background(),
+		filter,
+		bson.D{{Key: "$pull",
+			Value: bson.D{
+				{Key: "items", Value: bson.D{{Key: "id", Value: itemid}}},
+			},
+		}},
+		opts,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.IndentedJSON(http.StatusOK, response)
+}
+
+func updateItem(c *gin.Context) {
+	spaceid := c.Param("spaceid")
+	itemid := c.Param("itemid")
+
+	opts := options.Update().SetUpsert(false)
+	filter := bson.D{
+		{Key: "id", Value: spaceid},
+		{Key: "items.id", Value: itemid},
+	}
+
+	var updatedItem = Item{
+		ID: itemid,
+	}
+
+	if err := c.Bind(&updatedItem); err != nil {
+		return
+	}
+
+	// insert space into mongodb
+	spacesCollection.UpdateOne(
+		context.Background(),
+		filter,
+		bson.D{{Key: "$set",
+			Value: bson.D{
+				{Key: "items.$.name", Value: updatedItem.Name},
+				{Key: "items.$.complete", Value: updatedItem.Complete},
+			},
+		}},
+		opts,
+	)
+
+	c.IndentedJSON(http.StatusOK, updatedItem)
 }
