@@ -35,7 +35,7 @@ func createItem(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	spacesCollection.UpdateOne(
+	spaces.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$push",
@@ -54,7 +54,7 @@ func deleteAllItems(c *gin.Context) {
 	filter := bson.D{{Key: "id", Value: c.Param("spaceid")}}
 
 	// insert space into mongodb
-	response, err := spacesCollection.UpdateOne(
+	response, err := spaces.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$set",
@@ -89,7 +89,7 @@ func deleteItem(c *gin.Context) {
 		ID: itemid,
 	}
 	// insert space into mongodb
-	spacesCollection.FindOneAndUpdate(
+	spaces.FindOneAndUpdate(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$pull",
@@ -122,7 +122,7 @@ func updateItem(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	spacesCollection.UpdateOne(
+	spaces.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$set",
