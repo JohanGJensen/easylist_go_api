@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var router *gin.Engine = gin.Default()
 var spaces *mongo.Collection = mongodb.GetCollection("spaces")
 
 type Space struct {
@@ -29,7 +30,7 @@ type Message struct {
 }
 
 func Init() {
-	router := gin.Default()
+	// router := gin.Default()
 
 	// setting cors origin rules
 	config := cors.DefaultConfig()
@@ -39,8 +40,8 @@ func Init() {
 	router.GET("/health", CheckHealth)
 
 	// initialize all the routes
-	InitSpacesRoutes(router)
-	InitItemsRoutes(router)
+	InitSpacesRoutes()
+	InitItemsRoutes()
 
 	router.Run()
 }

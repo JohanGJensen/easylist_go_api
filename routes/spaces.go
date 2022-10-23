@@ -17,7 +17,7 @@ type SpaceRequest struct {
 }
 
 // initialize all spaces routes
-func InitSpacesRoutes(router *gin.Engine) {
+func InitSpacesRoutes() {
 	router.GET("/spaces/all", getSpaces)
 	router.GET("/spaces/space/:id", getSpace)
 	router.POST("/spaces/create", createSpace)
