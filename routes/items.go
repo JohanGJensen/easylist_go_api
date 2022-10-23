@@ -12,7 +12,7 @@ import (
 )
 
 // initialize all item routes
-func InitItemsRoutes(router *gin.Engine) {
+func InitItemsRoutes() {
 	router.POST("/items/create/:spaceid", createItem)
 	router.POST("/items/update/:spaceid/:itemid", updateItem)
 	router.DELETE("/items/delete/all/:spaceid", deleteAllItems)
