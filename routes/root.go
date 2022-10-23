@@ -40,6 +40,7 @@ func Init() {
 	router.GET("/health", CheckHealth)
 
 	// initialize all the routes
+	InitUserRoutes()
 	InitSpacesRoutes()
 	InitItemsRoutes()
 
