@@ -28,7 +28,7 @@ func InitSpacesRoutes(router *gin.Engine) {
 
 // GET:: call that gets all spaces documents in the spaces collection
 func getSpaces(c *gin.Context) {
-	cursor, err := spacesCollection.Find(context.Background(), bson.M{})
+	cursor, err := spaces.Find(context.Background(), bson.M{})
 
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +48,7 @@ func getSpace(c *gin.Context) {
 	filter := bson.D{{Key: "id", Value: id}}
 
 	var result bson.M
-	spacesCollection.FindOne(context.Background(), filter).Decode(&result)
+	spaces.FindOne(context.Background(), filter).Decode(&result)
 
 	if result != nil {
 		c.IndentedJSON(http.StatusCreated, result)
@@ -75,7 +75,7 @@ func createSpace(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	spacesCollection.InsertOne(context.Background(), newSpace)
+	spaces.InsertOne(context.Background(), newSpace)
 
 	c.IndentedJSON(http.StatusCreated, newSpace)
 }
@@ -94,7 +94,7 @@ func updateSpace(c *gin.Context) {
 		return
 	}
 	// insert space into mongodb
-	response, err := spacesCollection.UpdateOne(
+	response, err := spaces.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$set",
@@ -115,7 +115,7 @@ func updateSpace(c *gin.Context) {
 
 // DELETE:: delete all spaces
 func deleteAllSpaces(c *gin.Context) {
-	spacesCollection.DeleteMany(context.Background(), bson.M{})
+	spaces.DeleteMany(context.Background(), bson.M{})
 
 	var message = bson.M{"msg": "all spaces deleted"}
 	c.IndentedJSON(http.StatusOK, message)
@@ -125,7 +125,7 @@ func deleteAllSpaces(c *gin.Context) {
 func deleteSpace(c *gin.Context) {
 	id := c.Param("id")
 	filter := bson.D{{Key: "id", Value: id}}
-	spacesCollection.DeleteOne(context.Background(), filter)
+	spaces.DeleteOne(context.Background(), filter)
 
 	var message = Message{Msg: "space deleted"}
 	c.IndentedJSON(http.StatusOK, message)

@@ -14,8 +14,8 @@ import (
 
 var mongoURI string = ""
 
-func SetURI(login string, pwd string) {
-	mongoURI = fmt.Sprintf("mongodb+srv://%s:%s@cluster0.unqnv.mongodb.net/?retryWrites=true&w=majority", login, pwd)
+func SetURI(login string, pwd string, cluster string) {
+	mongoURI = fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority", login, pwd, cluster)
 }
 
 func ConnectDB() *mongo.Client {
@@ -23,7 +23,9 @@ func ConnectDB() *mongo.Client {
 
 	login := os.Getenv("LOGIN")
 	password := os.Getenv("PASSWORD")
-	SetURI(login, password)
+	cluster := os.Getenv("CLUSTER")
+
+	SetURI(login, password, cluster)
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
 	if err != nil {
@@ -52,7 +54,7 @@ func ConnectDB() *mongo.Client {
 var DB *mongo.Client = ConnectDB()
 
 // getting database collections
-func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
-	collection := client.Database("listDB").Collection(collectionName)
+func GetCollection(collectionName string) *mongo.Collection {
+	collection := DB.Database("listDB").Collection(collectionName)
 	return collection
 }

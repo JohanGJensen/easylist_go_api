@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var spacesCollection *mongo.Collection = mongodb.GetCollection(mongodb.DB, "spacesCollection")
+var spaces *mongo.Collection = mongodb.GetCollection("spaces")
 
 type Space struct {
 	ID    string `json:"id" form:"id"`
