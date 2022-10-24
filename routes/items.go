@@ -76,11 +76,17 @@ func deleteItem(c *gin.Context) {
 	spaceid := c.Param("spaceid")
 	itemid := c.Param("itemid")
 
-	opts := options.Update().SetUpsert(false)
 	filter := bson.D{{Key: "id", Value: spaceid}}
 
+	upsert := false
+	after := options.After
+	opts := options.FindOneAndUpdateOptions{
+		ReturnDocument: &after,
+		Upsert:         &upsert,
+	}
+
 	// insert space into mongodb
-	response, err := spacesCollection.UpdateOne(
+	response := spacesCollection.FindOneAndUpdate(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$pull",
@@ -88,12 +94,8 @@ func deleteItem(c *gin.Context) {
 				{Key: "items", Value: bson.D{{Key: "id", Value: itemid}}},
 			},
 		}},
-		opts,
+		&opts,
 	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	c.IndentedJSON(http.StatusOK, response)
 }
