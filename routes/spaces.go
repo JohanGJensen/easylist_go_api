@@ -127,6 +127,6 @@ func deleteSpace(c *gin.Context) {
 	filter := bson.D{{Key: "id", Value: id}}
 	spacesCollection.DeleteOne(context.Background(), filter)
 
-	var message = Message{Msg: "space deleted"}
-	c.IndentedJSON(http.StatusOK, message)
+	var deletedSpace = Space{ID: id}
+	c.IndentedJSON(http.StatusOK, deletedSpace)
 }
