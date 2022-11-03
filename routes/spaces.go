@@ -18,12 +18,15 @@ type SpaceRequest struct {
 
 // initialize all spaces routes
 func InitSpacesRoutes() {
-	router.GET("/spaces/all", getSpaces)
-	router.GET("/spaces/space/:id", getSpace)
-	router.POST("/spaces/create", createSpace)
-	router.POST("/spaces/update/:id", updateSpace)
-	router.DELETE("/spaces/delete/all", deleteAllSpaces)
-	router.DELETE("/spaces/delete/:id", deleteSpace)
+	spaces := router.Group("/spaces")
+	{
+		spaces.GET("/all", getSpaces)
+		spaces.GET("/space/:id", getSpace)
+		spaces.POST("/create", createSpace)
+		spaces.POST("/update/:id", updateSpace)
+		spaces.DELETE("/delete/all", deleteAllSpaces)
+		spaces.DELETE("/delete/:id", deleteSpace)
+	}
 }
 
 // GET:: call that gets all spaces documents in the spaces collection

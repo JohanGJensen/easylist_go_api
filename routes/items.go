@@ -13,10 +13,13 @@ import (
 
 // initialize all item routes
 func InitItemsRoutes() {
-	router.POST("/items/create/:spaceid", createItem)
-	router.POST("/items/update/:spaceid/:itemid", updateItem)
-	router.DELETE("/items/delete/all/:spaceid", deleteAllItems)
-	router.DELETE("/items/delete/:spaceid/:itemid", deleteItem)
+	items := router.Group("/items")
+	{
+		items.POST("/create/:spaceid", createItem)
+		items.POST("/update/:spaceid/:itemid", updateItem)
+		items.DELETE("/delete/all/:spaceid", deleteAllItems)
+		items.DELETE("/delete/:spaceid/:itemid", deleteItem)
+	}
 }
 
 func createItem(c *gin.Context) {
