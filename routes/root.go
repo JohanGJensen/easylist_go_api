@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"example/web-service-gin/mongodb"
+	"example/easylist-api/mongodb"
 	"os"
 
 	"github.com/gin-contrib/cors"
@@ -33,7 +33,8 @@ type Item struct {
 }
 
 type Message struct {
-	Msg string `json:"msg"`
+	Message string `json:"message"`
+	Token string `json:"token"`
 }
 
 func Init() {
