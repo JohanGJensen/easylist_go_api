@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example/web-service-gin/routes"
+	"example/easylist-api/routes"
 	"log"
 	"os"
 

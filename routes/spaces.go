@@ -53,7 +53,7 @@ func getSpace(c *gin.Context) {
 	if result != nil {
 		c.IndentedJSON(http.StatusCreated, result)
 	} else {
-		var message = Message{Msg: "could not find space"}
+		var message = Message{Message: "could not find space"}
 		c.IndentedJSON(http.StatusBadRequest, message)
 	}
 }
@@ -127,6 +127,6 @@ func deleteSpace(c *gin.Context) {
 	filter := bson.D{{Key: "id", Value: id}}
 	spaces.DeleteOne(context.Background(), filter)
 
-	var deletedSpace = Space{ID: id}
-	c.IndentedJSON(http.StatusOK, deletedSpace)
+	var message = Message{Message: "space deleted"}
+	c.IndentedJSON(http.StatusOK, message)
 }

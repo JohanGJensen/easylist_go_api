@@ -2,8 +2,8 @@ package routes
 
 import (
 	"context"
-	"example/web-service-gin/mongodb"
-	"fmt"
+	"example/easylist-api/auth"
+	"example/easylist-api/mongodb"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,26 +21,28 @@ func InitUserRoutes() {
 }
 
 // METHOD: POST
-// creates new user
 func RegisterUser(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
 
 	if username == "" {
-		fmt.Println("no username provided!")
-		return
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "no username provided!",
+		})
 	}
 
 	user := FindUserInCollection(username)
 
 	if user != (User{}) {
-		fmt.Println("user already exists! Please select another username")
-		return
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "user already exists! Please select another username",
+		})
 	}
 
 	if pwd == "" {
-		fmt.Println("no password provided!")
-		return
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "no password provided!",
+		})
 	}
 
 	hash, _ := HashPassword(pwd)
@@ -52,38 +54,69 @@ func RegisterUser(c *gin.Context) {
 	}
 
 	// insert user into mongodb
-	users.InsertOne(context.Background(), newUser)
+	_, err := users.InsertOne(context.Background(), newUser)
 
-	c.IndentedJSON(http.StatusOK, newUser)
+	if (err != nil) {
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "Something went wrong with reqistering the user profile.",
+		})
+	}
+
+	JWT, err := auth.GenerateJWT(user.Username)
+	
+		if (err != nil) {
+			c.IndentedJSON(http.StatusBadRequest, Message{
+				Message: "There was an error with generating the JWT!",
+			})
+		}
+	
+		c.IndentedJSON(http.StatusOK, Message{
+			Message: "successfully registered.",
+			Token: JWT,
+		})
 }
 
 // METHOD: POST
-// attempts to login user
 func LoginUser(c *gin.Context) {
 	username := c.PostForm("username")
 	pwd := c.PostForm("password")
 
 	if username == "" {
-		fmt.Println("no username provided!")
-		return
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "no username provided!",
+		})
 	}
 
 	if pwd == "" {
-		fmt.Println("no password provided!")
-		return
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "no password provided!",
+		})
 	}
 
 	user := FindUserInCollection(username)
 
 	if user == (User{}) {
-		fmt.Println("user does not exist! Please make sure the username is correct")
-		return
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "user does not exist! Please make sure the username is correct",
+		})
 	}
 
 	match := CheckPasswordHash(pwd, user.Password)
 
-	fmt.Println(match)
-	fmt.Println(user.Password)
+	if (match) {
+		JWT, err := auth.GenerateJWT(user.Username)
+	
+		if (err != nil) {
+			c.IndentedJSON(http.StatusBadRequest, Message{
+				Message: "There was an error with generating the JWT!",
+			})
+		}
+	
+		c.IndentedJSON(http.StatusOK, Message{
+			Message: "successfully logged in.",
+			Token: JWT,
+		})
+	}
 }
 
 // UTILITY
