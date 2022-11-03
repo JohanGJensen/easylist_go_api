@@ -2,17 +2,26 @@ package auth
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
-var jwtKey = []byte("supersecretkey")
+var jwtKey = SetJwtKey()
 
 type JWTClaim struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
+}
+
+func SetJwtKey() (key []byte) {
+	godotenv.Load(".env")
+	secret := os.Getenv("JWT_SECRET")
+
+	return []byte(secret)
 }
 
 func GenerateJWT(username string) (tokenString string, err error) {
