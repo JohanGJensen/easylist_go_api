@@ -16,8 +16,11 @@ var users *mongo.Collection = mongodb.GetCollection("users")
 
 // initialize all item routes
 func InitUserRoutes() {
-	router.POST("users/register", RegisterUser)
-	router.POST("users/login", LoginUser)
+	users := router.Group("/users")
+	{
+		users.POST("/register", RegisterUser)
+		users.POST("/login", LoginUser)
+	}
 }
 
 // METHOD: POST
