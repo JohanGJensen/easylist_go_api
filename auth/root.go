@@ -2,26 +2,17 @@ package auth
 
 import (
 	"errors"
-	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
-var jwtKey = SetJwtKey()
+var jwtKey = []byte("supersecretkey")
 
 type JWTClaim struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
-}
-
-func SetJwtKey() []byte {
-	godotenv.Load(".env")
-	secret := os.Getenv("JWT_SECRET")
-
-	return []byte(secret)
 }
 
 func GenerateJWT(username string) (tokenString string, err error) {
@@ -42,7 +33,7 @@ func ValidateToken(signedToken string) (err error) {
 		signedToken,
 		&JWTClaim{},
 		func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
+			return []byte(jwtKey), nil
 		},
 	)
 	if err != nil {
