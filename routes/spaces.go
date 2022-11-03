@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"example/easylist-api/auth"
 	"log"
 	"net/http"
 
@@ -18,7 +19,7 @@ type SpaceRequest struct {
 
 // initialize all spaces routes
 func InitSpacesRoutes() {
-	spaces := router.Group("/spaces")
+	spaces := router.Group("/spaces").Use(auth.Auth())
 	{
 		spaces.GET("/all", getSpaces)
 		spaces.GET("/space/:id", getSpace)

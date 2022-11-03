@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"example/easylist-api/auth"
 	"log"
 	"net/http"
 
@@ -13,7 +14,7 @@ import (
 
 // initialize all item routes
 func InitItemsRoutes() {
-	items := router.Group("/items")
+	items := router.Group("/items").Use(auth.Auth())
 	{
 		items.POST("/create/:spaceid", createItem)
 		items.POST("/update/:spaceid/:itemid", updateItem)
