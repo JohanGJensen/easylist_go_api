@@ -17,7 +17,7 @@ type JWTClaim struct {
 	jwt.StandardClaims
 }
 
-func SetJwtKey() (key []byte) {
+func SetJwtKey() []byte {
 	godotenv.Load(".env")
 	secret := os.Getenv("JWT_SECRET")
 
@@ -26,7 +26,7 @@ func SetJwtKey() (key []byte) {
 
 func GenerateJWT(username string) (tokenString string, err error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
-	claims:= &JWTClaim{
+	claims := &JWTClaim{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
@@ -42,7 +42,7 @@ func ValidateToken(signedToken string) (err error) {
 		signedToken,
 		&JWTClaim{},
 		func(token *jwt.Token) (interface{}, error) {
-			return []byte(jwtKey), nil
+			return jwtKey, nil
 		},
 	)
 	if err != nil {
@@ -60,7 +60,7 @@ func ValidateToken(signedToken string) (err error) {
 	return
 }
 
-func Auth() gin.HandlerFunc{
+func Auth() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenString := context.GetHeader("Authorization")
 		if tokenString == "" {
@@ -68,7 +68,7 @@ func Auth() gin.HandlerFunc{
 			context.Abort()
 			return
 		}
-		err:= ValidateToken(tokenString)
+		err := ValidateToken(tokenString)
 		if err != nil {
 			context.JSON(401, gin.H{"error": err.Error()})
 			context.Abort()
