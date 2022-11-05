@@ -27,7 +27,7 @@ func createItem(c *gin.Context) {
 	opts := options.Update().SetUpsert(false)
 	filter := bson.D{{Key: "id", Value: c.Param("spaceid")}}
 
-	var newItem = Item{
+	newItem := Item{
 		ID:       uuid.New().String(),
 		Complete: false,
 	}
@@ -35,11 +35,17 @@ func createItem(c *gin.Context) {
 	// Call Bind to bind the received data to
 	// newItem.
 	if err := c.Bind(&newItem); err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to bind item request parameters",
+		})
+
 		return
 	}
 
 	// insert space into mongodb
-	spaces.UpdateOne(
+	_, err := spaces.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$push",
@@ -49,6 +55,16 @@ func createItem(c *gin.Context) {
 		}},
 		opts,
 	)
+
+	if err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to create item on space",
+		})
+
+		return
+	}
 
 	c.IndentedJSON(http.StatusOK, newItem)
 }
@@ -70,7 +86,13 @@ func deleteAllItems(c *gin.Context) {
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to delete items on space",
+		})
+
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, response)
@@ -89,9 +111,6 @@ func deleteItem(c *gin.Context) {
 		Upsert:         &upsert,
 	}
 
-	var deletedItem = Item{
-		ID: itemid,
-	}
 	// insert space into mongodb
 	spaces.FindOneAndUpdate(
 		context.Background(),
@@ -104,7 +123,17 @@ func deleteItem(c *gin.Context) {
 		&opts,
 	)
 
-	c.IndentedJSON(http.StatusOK, deletedItem)
+	if err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to delete item on space",
+		})
+
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, response)
 }
 
 func updateItem(c *gin.Context) {
@@ -117,16 +146,22 @@ func updateItem(c *gin.Context) {
 		{Key: "items.id", Value: itemid},
 	}
 
-	var updatedItem = Item{
+	updatedItem := Item{
 		ID: itemid,
 	}
 
 	if err := c.Bind(&updatedItem); err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to bind request params onto item.",
+		})
+
 		return
 	}
 
 	// insert space into mongodb
-	spaces.UpdateOne(
+	_, err := spaces.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$set",
@@ -137,6 +172,16 @@ func updateItem(c *gin.Context) {
 		}},
 		opts,
 	)
+
+	if err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to update item.",
+		})
+
+		return
+	}
 
 	c.IndentedJSON(http.StatusOK, updatedItem)
 }

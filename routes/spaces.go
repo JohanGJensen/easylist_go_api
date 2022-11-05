@@ -35,12 +35,24 @@ func getSpaces(c *gin.Context) {
 	cursor, err := spaces.Find(context.Background(), bson.M{})
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "A problem occured with loading the spaces.",
+		})
+
+		return
 	}
 
-	var spaces []Space
+	spaces := make([]Space, 0)
 	if err = cursor.All(context.Background(), &spaces); err != nil {
-		log.Fatal(err)
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "A problem occured with decoding the spaces.",
+		})
+
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, spaces)
@@ -51,23 +63,21 @@ func getSpace(c *gin.Context) {
 	id := c.Param("id")
 	filter := bson.D{{Key: "id", Value: id}}
 
-	var result bson.M
+	result := make(bson.M)
 	spaces.FindOne(context.Background(), filter).Decode(&result)
 
 	if result != nil {
-		c.IndentedJSON(http.StatusCreated, result)
+		c.IndentedJSON(http.StatusOK, result)
 	} else {
-		var message = Message{Message: "could not find space"}
+		message := Message{Message: "could not find space"}
 		c.IndentedJSON(http.StatusBadRequest, message)
 	}
 }
 
 // POST:: create space
 func createSpace(c *gin.Context) {
-	var newSpace Space
-
 	// set uuid and items slice
-	newSpace = Space{
+	newSpace := Space{
 		ID:    uuid.New().String(),
 		Items: make([]Item, 0),
 	}
@@ -75,11 +85,27 @@ func createSpace(c *gin.Context) {
 	// Call Bind to bind the received data to
 	// newSpace.
 	if err := c.Bind(&newSpace); err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to create a new space.",
+		})
+
 		return
 	}
 
 	// insert space into mongodb
-	spaces.InsertOne(context.Background(), newSpace)
+	_, err := spaces.InsertOne(context.Background(), newSpace)
+
+	if err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "could not insert new space into the database correctly.",
+		})
+
+		return
+	}
 
 	c.IndentedJSON(http.StatusCreated, newSpace)
 }
@@ -95,6 +121,12 @@ func updateSpace(c *gin.Context) {
 	// Call Bind to bind the received data to
 	// newSpace.
 	if err := c.Bind(&update); err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "could not bind data properly to space.",
+		})
+
 		return
 	}
 	// insert space into mongodb
@@ -111,7 +143,13 @@ func updateSpace(c *gin.Context) {
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to correctly update space in the database",
+		})
+
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, response)
@@ -119,18 +157,41 @@ func updateSpace(c *gin.Context) {
 
 // DELETE:: delete all spaces
 func deleteAllSpaces(c *gin.Context) {
-	spaces.DeleteMany(context.Background(), bson.M{})
+	_, err := spaces.DeleteMany(context.Background(), bson.M{})
 
-	var message = bson.M{"msg": "all spaces deleted"}
-	c.IndentedJSON(http.StatusOK, message)
+	if err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to correctly delete spaces.",
+		})
+
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, Message{
+		Message: "all spaces deleted.",
+	})
 }
 
 // DELETE:: delete space
 func deleteSpace(c *gin.Context) {
 	id := c.Param("id")
 	filter := bson.D{{Key: "id", Value: id}}
-	spaces.DeleteOne(context.Background(), filter)
 
-	var message = Message{Message: "space deleted"}
-	c.IndentedJSON(http.StatusOK, message)
+	_, err := spaces.DeleteOne(context.Background(), filter)
+
+	if err != nil {
+		log.Print(err)
+
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "failed to delete space.",
+		})
+
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, Message{
+		Message: "space deleted.",
+	})
 }
