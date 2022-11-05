@@ -34,12 +34,10 @@ type Item struct {
 
 type Message struct {
 	Message string `json:"message"`
-	Token string `json:"token"`
+	Token   string `json:"token"`
 }
 
 func Init() {
-	// router := gin.Default()
-
 	// setting cors origin rules
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{os.Getenv("HOST")}
