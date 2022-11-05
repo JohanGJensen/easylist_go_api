@@ -33,8 +33,8 @@ type Item struct {
 }
 
 type Message struct {
-	Message string `json:"message"`
-	Token   string `json:"token"`
+	Message string `json:"message" binding:"required"`
+	Token   string `json:"token,omitempty"`
 }
 
 func Init() {
