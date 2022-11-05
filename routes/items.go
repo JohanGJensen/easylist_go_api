@@ -112,7 +112,7 @@ func deleteItem(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	spaces.FindOneAndUpdate(
+	response, err := spaces.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$pull",
