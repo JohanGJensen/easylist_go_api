@@ -12,20 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var mongoURI string = ""
-
-func SetURI(login string, pwd string) {
-	mongoURI = fmt.Sprintf("mongodb+srv://%s:%s@cluster0.unqnv.mongodb.net/?retryWrites=true&w=majority", login, pwd)
-}
-
 func ConnectDB() *mongo.Client {
 	godotenv.Load(".env")
 
-	login := os.Getenv("LOGIN")
-	password := os.Getenv("PASSWORD")
-	SetURI(login, password)
+	uri := os.Getenv("MONGO_URI")
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
 	}
