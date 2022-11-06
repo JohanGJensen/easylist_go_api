@@ -50,7 +50,7 @@ func RegisterUser(c *gin.Context) {
 
 	hash, _ := HashPassword(pwd)
 
-	var newUser = User{
+	newUser := User{
 		ID:       uuid.New().String(),
 		Username: username,
 		Password: hash,
@@ -59,24 +59,24 @@ func RegisterUser(c *gin.Context) {
 	// insert user into mongodb
 	_, err := users.InsertOne(context.Background(), newUser)
 
-	if (err != nil) {
+	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, Message{
 			Message: "Something went wrong with reqistering the user profile.",
 		})
 	}
 
 	JWT, err := auth.GenerateJWT(user.Username)
-	
-		if (err != nil) {
-			c.IndentedJSON(http.StatusBadRequest, Message{
-				Message: "There was an error with generating the JWT!",
-			})
-		}
-	
-		c.IndentedJSON(http.StatusOK, Message{
-			Message: "successfully registered.",
-			Token: JWT,
+
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, Message{
+			Message: "There was an error with generating the JWT!",
 		})
+	}
+
+	c.IndentedJSON(http.StatusOK, Message{
+		Message: "successfully registered.",
+		Token:   JWT,
+	})
 }
 
 // METHOD: POST
@@ -106,18 +106,18 @@ func LoginUser(c *gin.Context) {
 
 	match := CheckPasswordHash(pwd, user.Password)
 
-	if (match) {
+	if match {
 		JWT, err := auth.GenerateJWT(user.Username)
-	
-		if (err != nil) {
+
+		if err != nil {
 			c.IndentedJSON(http.StatusBadRequest, Message{
 				Message: "There was an error with generating the JWT!",
 			})
 		}
-	
+
 		c.IndentedJSON(http.StatusOK, Message{
 			Message: "successfully logged in.",
-			Token: JWT,
+			Token:   JWT,
 		})
 	}
 }
