@@ -1,4 +1,4 @@
-package routes
+package health
 
 import (
 	"net/http"

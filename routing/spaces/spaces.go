@@ -1,4 +1,4 @@
-package routes
+package spaces
 
 import (
 	"context"
@@ -6,35 +6,55 @@ import (
 	"net/http"
 
 	"example/easylist-api/auth"
+	"example/easylist-api/mongodb"
+	"example/easylist-api/structs"
 	"example/easylist-api/validation"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type Message structs.Message
 
 type SpaceRequest struct {
 	Name string `json:"name" form:"name"`
 	User string `json:"user" form:"user"`
 }
 
-// initialize all spaces routes
-func InitSpacesRoutes() {
-	spaces := router.Group("/spaces").Use(auth.Auth())
+type Space struct {
+	ID    string `json:"id" form:"id"`
+	Items []Item `json:"items" form:"items"`
+	Name  string `json:"name" form:"name"`
+	User  string `json:"user" form:"user"`
+}
+
+type Item struct {
+	ID       string `json:"id" form:"id"`
+	Name     string `json:"name" form:"name"`
+	Complete bool   `json:"complete" form:"complete"`
+}
+
+var SCollection *mongo.Collection = mongodb.GetCollection("spaces")
+
+// initialize all spaces e
+func InitSpacesRoutes(e *gin.Engine) {
+	spaces := e.Group("/spaces").Use(auth.Auth())
 	{
-		spaces.GET("/all", getSpaces)
+		spaces.GET("/all", getSCollection)
 		spaces.GET("/space/:id", getSpace)
 		spaces.POST("/create", createSpace)
 		spaces.POST("/update/:id", updateSpace)
-		spaces.DELETE("/delete/all", deleteAllSpaces)
+		spaces.DELETE("/delete/all", deleteAllSCollection)
 		spaces.DELETE("/delete/:id", deleteSpace)
 	}
 }
 
 // GET:: call that gets all spaces documents in the spaces collection
-func getSpaces(c *gin.Context) {
-	cursor, err := spaces.Find(context.Background(), bson.M{})
+func getSCollection(c *gin.Context) {
+	cursor, err := SCollection.Find(context.Background(), bson.M{})
 
 	if err != nil {
 		log.Print(err)
@@ -66,7 +86,7 @@ func getSpace(c *gin.Context) {
 	filter := bson.D{{Key: "id", Value: id}}
 
 	result := make(bson.M)
-	spaces.FindOne(context.Background(), filter).Decode(&result)
+	SCollection.FindOne(context.Background(), filter).Decode(&result)
 
 	if result != nil {
 		c.IndentedJSON(http.StatusOK, result)
@@ -104,7 +124,7 @@ func createSpace(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	_, err := spaces.InsertOne(context.Background(), newSpace)
+	_, err := SCollection.InsertOne(context.Background(), newSpace)
 
 	if err != nil {
 		log.Print(err)
@@ -139,7 +159,7 @@ func updateSpace(c *gin.Context) {
 		return
 	}
 	// insert space into mongodb
-	response, err := spaces.UpdateOne(
+	response, err := SCollection.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$set",
@@ -165,8 +185,8 @@ func updateSpace(c *gin.Context) {
 }
 
 // DELETE:: delete all spaces
-func deleteAllSpaces(c *gin.Context) {
-	_, err := spaces.DeleteMany(context.Background(), bson.M{})
+func deleteAllSCollection(c *gin.Context) {
+	_, err := SCollection.DeleteMany(context.Background(), bson.M{})
 
 	if err != nil {
 		log.Print(err)
@@ -188,7 +208,7 @@ func deleteSpace(c *gin.Context) {
 	id := c.Param("id")
 	filter := bson.D{{Key: "id", Value: id}}
 
-	_, err := spaces.DeleteOne(context.Background(), filter)
+	_, err := SCollection.DeleteOne(context.Background(), filter)
 
 	if err != nil {
 		log.Print(err)

@@ -1,8 +1,10 @@
-package routes
+package items
 
 import (
 	"context"
 	"example/easylist-api/auth"
+	"example/easylist-api/routing/spaces"
+	"example/easylist-api/structs"
 	"log"
 	"net/http"
 
@@ -12,9 +14,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type Message structs.Message
+
+type Space spaces.Space
+type Item spaces.Item
+
 // initialize all item routes
-func InitItemsRoutes() {
-	items := router.Group("/items").Use(auth.Auth())
+func InitItemsRoutes(e *gin.Engine) {
+	items := e.Group("/items").Use(auth.Auth())
 	{
 		items.POST("/create/:spaceid", createItem)
 		items.POST("/update/:spaceid/:itemid", updateItem)
@@ -45,7 +52,7 @@ func createItem(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	_, err := spaces.UpdateOne(
+	_, err := spaces.SCollection.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$push",
@@ -74,7 +81,7 @@ func deleteAllItems(c *gin.Context) {
 	filter := bson.D{{Key: "id", Value: c.Param("spaceid")}}
 
 	// insert space into mongodb
-	response, err := spaces.UpdateOne(
+	response, err := spaces.SCollection.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$set",
@@ -112,7 +119,7 @@ func deleteItem(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	err := spaces.FindOneAndUpdate(
+	err := spaces.SCollection.FindOneAndUpdate(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$pull",
@@ -163,7 +170,7 @@ func updateItem(c *gin.Context) {
 	}
 
 	// insert space into mongodb
-	_, err := spaces.UpdateOne(
+	_, err := spaces.SCollection.UpdateOne(
 		context.Background(),
 		filter,
 		bson.D{{Key: "$set",

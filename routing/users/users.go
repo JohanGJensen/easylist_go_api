@@ -1,9 +1,10 @@
-package routes
+package users
 
 import (
 	"context"
 	"example/easylist-api/auth"
 	"example/easylist-api/mongodb"
+	"example/easylist-api/structs"
 	"example/easylist-api/validation"
 	"net/http"
 
@@ -15,14 +16,22 @@ import (
 
 var users *mongo.Collection = mongodb.GetCollection("users")
 
+type Message structs.Message
+
+type User struct {
+	ID       string `bson:"id" json:"id" form:"id"`
+	Username string `bson:"username" json:"username" form:"username"`
+	Password string `bson:"password" json:"password" form:"password"`
+}
+
 type UserRequest struct {
 	Username string `bson:"username" json:"username" form:"username" binding:"required,min=3,max=16"`
 	Password string `bson:"password" json:"password" form:"password" binding:"required,min=3"`
 }
 
 // initialize all item routes
-func InitUserRoutes() {
-	users := router.Group("/users")
+func InitUserRoutes(e *gin.Engine) {
+	users := e.Group("/users")
 	{
 		users.POST("/register", registerUser)
 		users.POST("/login", loginUser)
@@ -58,7 +67,7 @@ func registerUser(c *gin.Context) {
 		})
 	}
 
-	hash, _ := HashPassword(body.Password)
+	hash, _ := hashPassword(body.Password)
 
 	newUser := User{
 		ID:       uuid.New().String(),
@@ -118,7 +127,7 @@ func loginUser(c *gin.Context) {
 		})
 	}
 
-	match := CheckPasswordHash(body.Password, user.Password)
+	match := checkPasswordHash(body.Password, user.Password)
 
 	if match {
 		JWT, err := auth.GenerateJWT(user.Username)
