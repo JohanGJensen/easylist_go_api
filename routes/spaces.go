@@ -2,9 +2,11 @@ package routes
 
 import (
 	"context"
-	"example/easylist-api/auth"
 	"log"
 	"net/http"
+
+	"example/easylist-api/auth"
+	"example/easylist-api/validation"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -76,6 +78,13 @@ func getSpace(c *gin.Context) {
 
 // POST:: create space
 func createSpace(c *gin.Context) {
+	body := SpaceRequest{}
+	// handle validation errors
+	if er := c.ShouldBind(&body); er != nil {
+		validation.Validate(c, er)
+		return
+	}
+
 	// set uuid and items slice
 	newSpace := Space{
 		ID:    uuid.New().String(),

@@ -4,6 +4,7 @@ import (
 	"context"
 	"example/easylist-api/auth"
 	"example/easylist-api/mongodb"
+	"example/easylist-api/validation"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,27 +15,36 @@ import (
 
 var users *mongo.Collection = mongodb.GetCollection("users")
 
+type UserRequest struct {
+	Username string `bson:"username" json:"username" form:"username" binding:"required,min=3,max=16"`
+	Password string `bson:"password" json:"password" form:"password" binding:"required,min=3"`
+}
+
 // initialize all item routes
 func InitUserRoutes() {
 	users := router.Group("/users")
 	{
-		users.POST("/register", RegisterUser)
-		users.POST("/login", LoginUser)
+		users.POST("/register", registerUser)
+		users.POST("/login", loginUser)
 	}
 }
 
 // METHOD: POST
-func RegisterUser(c *gin.Context) {
-	username := c.PostForm("username")
-	pwd := c.PostForm("password")
+func registerUser(c *gin.Context) {
+	body := UserRequest{}
+	// handle validation errors
+	if er := c.ShouldBind(&body); er != nil {
+		validation.Validate(c, er)
+		return
+	}
 
-	if username == "" {
+	if body.Username == "" {
 		c.IndentedJSON(http.StatusBadRequest, Message{
 			Message: "no username provided!",
 		})
 	}
 
-	user := FindUserInCollection(username)
+	user := FindUserInCollection(body.Username)
 
 	if user != (User{}) {
 		c.IndentedJSON(http.StatusBadRequest, Message{
@@ -42,17 +52,17 @@ func RegisterUser(c *gin.Context) {
 		})
 	}
 
-	if pwd == "" {
+	if body.Password == "" {
 		c.IndentedJSON(http.StatusBadRequest, Message{
 			Message: "no password provided!",
 		})
 	}
 
-	hash, _ := HashPassword(pwd)
+	hash, _ := HashPassword(body.Password)
 
 	newUser := User{
 		ID:       uuid.New().String(),
-		Username: username,
+		Username: body.Username,
 		Password: hash,
 	}
 
@@ -80,23 +90,27 @@ func RegisterUser(c *gin.Context) {
 }
 
 // METHOD: POST
-func LoginUser(c *gin.Context) {
-	username := c.PostForm("username")
-	pwd := c.PostForm("password")
+func loginUser(c *gin.Context) {
+	body := UserRequest{}
+	// handle validation errors
+	if er := c.ShouldBind(&body); er != nil {
+		validation.Validate(c, er)
+		return
+	}
 
-	if username == "" {
+	if body.Username == "" {
 		c.IndentedJSON(http.StatusBadRequest, Message{
 			Message: "no username provided!",
 		})
 	}
 
-	if pwd == "" {
+	if body.Password == "" {
 		c.IndentedJSON(http.StatusBadRequest, Message{
 			Message: "no password provided!",
 		})
 	}
 
-	user := FindUserInCollection(username)
+	user := FindUserInCollection(body.Username)
 
 	if user == (User{}) {
 		c.IndentedJSON(http.StatusBadRequest, Message{
@@ -104,7 +118,7 @@ func LoginUser(c *gin.Context) {
 		})
 	}
 
-	match := CheckPasswordHash(pwd, user.Password)
+	match := CheckPasswordHash(body.Password, user.Password)
 
 	if match {
 		JWT, err := auth.GenerateJWT(user.Username)
