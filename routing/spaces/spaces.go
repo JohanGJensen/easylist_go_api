@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"example/easylist-api/auth"
+	"example/easylist-api/mongodb"
+	"example/easylist-api/structs"
 	"example/easylist-api/validation"
 
 	"github.com/gin-gonic/gin"
