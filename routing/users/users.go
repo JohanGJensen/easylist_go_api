@@ -2,9 +2,8 @@ package users
 
 import (
 	"context"
-	"example/easylist-api/auth"
-	"example/easylist-api/mongodb"
-	"example/easylist-api/structs"
+	"easylist/auth"
+	"easylist/mongodb"
 	"example/easylist-api/validation"
 	"net/http"
 
@@ -16,14 +15,6 @@ import (
 )
 
 var users *mongo.Collection = mongodb.GetCollection("users")
-
-type Message structs.Message
-
-type User struct {
-	ID       string `bson:"id" json:"id" form:"id"`
-	Username string `bson:"username" json:"username" form:"username"`
-	Password string `bson:"password" json:"password" form:"password"`
-}
 
 type UserRequest struct {
 	Username string `bson:"username" json:"username" form:"username" binding:"required,min=3,max=16"`
@@ -68,7 +59,7 @@ func registerUser(c *gin.Context) {
 		})
 	}
 
-	hash, _ := hashPassword(body.Password)
+	hash, _ := HashPassword(body.Password)
 
 	newUser := User{
 		ID:       uuid.New().String(),
@@ -128,7 +119,7 @@ func loginUser(c *gin.Context) {
 		})
 	}
 
-	match := checkPasswordHash(body.Password, user.Password)
+	match := CheckPasswordHash(body.Password, user.Password)
 
 	if match {
 		JWT, err := auth.GenerateJWT(user.Username)
