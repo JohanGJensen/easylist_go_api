@@ -143,6 +143,10 @@ func loginUser(c *gin.Context) {
 			Message: "successfully logged in.",
 			Token:   JWT,
 		})
+	} else {
+		c.IndentedJSON(http.StatusUnauthorized, Message{
+			Message: "incorrect username or password",
+		})
 	}
 }
 
