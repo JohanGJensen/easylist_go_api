@@ -1,4 +1,4 @@
-module example/web-service-gin
+module easylist
 
 go 1.19
 

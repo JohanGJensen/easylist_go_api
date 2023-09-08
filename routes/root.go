@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"example/web-service-gin/mongodb"
+	"easylist/mongodb"
 	"os"
 
 	"github.com/gin-contrib/cors"
