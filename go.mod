@@ -1,4 +1,4 @@
-module example/easylist-api
+module easylist
 
 go 1.19
 

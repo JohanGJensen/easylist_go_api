@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example/easylist-api/routing/routes"
+	"easylist/routes"
 	"log"
 	"os"
 
