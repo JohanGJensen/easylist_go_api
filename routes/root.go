@@ -2,7 +2,8 @@ package routes
 
 import (
 	"easylist/mongodb"
-	"os"
+	util "easylist/utility"
+	"log"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -29,11 +30,16 @@ type Message struct {
 }
 
 func Init() {
+	envConfig, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
 	router := gin.Default()
 
 	// setting cors origin rules
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{os.Getenv("HOST")}
+	config.AllowOrigins = []string{envConfig.Host}
 	router.Use(cors.New(config))
 
 	router.GET("/health", CheckHealth)

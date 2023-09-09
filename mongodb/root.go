@@ -2,23 +2,22 @@ package mongodb
 
 import (
 	"context"
+	util "easylist/utility"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func ConnectDB() *mongo.Client {
-	err := godotenv.Load(".env")
+	config, err := util.LoadConfig(".")
 	if err != nil {
-		log.Fatalf("Some error occured. Err: %s", err)
+		log.Fatal("cannot load config:", err)
 	}
 
-	uri := os.Getenv("MONGO_URI")
+	uri := config.MongoURI
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
