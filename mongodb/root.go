@@ -13,7 +13,10 @@ import (
 )
 
 func ConnectDB() *mongo.Client {
-	godotenv.Load(".env")
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Some error occured. Err: %s", err)
+	}
 
 	uri := os.Getenv("MONGO_URI")
 
