@@ -11,18 +11,9 @@ type Config struct {
 	GinMode   string `mapstructure:"GIN_MODE"`
 }
 
-func bindEnvs() {
-	viper.BindEnv("HOST")
-	viper.BindEnv("MONGO_URI")
-	viper.BindEnv("JWT_SECRET")
-	viper.BindEnv("GIN_MODE")
-}
-
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName(".env")
-
-	bindEnvs()
 
 	viper.SetConfigType("env")
 
