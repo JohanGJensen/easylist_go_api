@@ -2,20 +2,19 @@ package main
 
 import (
 	"easylist/routes"
+	util "easylist/utility"
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load(".env")
+	config, err := util.LoadConfig(".")
 	if err != nil {
-		log.Fatalf("Some error occured. Err: %s", err)
+		log.Fatal("cannot load config:", err)
 	}
 
-	if os.Getenv("GIN_MODE") == gin.ReleaseMode {
+	if config.GinMode == gin.ReleaseMode {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
