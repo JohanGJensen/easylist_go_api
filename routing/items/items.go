@@ -2,9 +2,9 @@ package items
 
 import (
 	"context"
-	"example/easylist-api/auth"
-	"example/easylist-api/routing/spaces"
-	"example/easylist-api/structs"
+	"easylist/auth"
+	"easylist/routing/spaces"
+	"easylist/structs"
 	"log"
 	"net/http"
 

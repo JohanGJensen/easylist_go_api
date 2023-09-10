@@ -1,10 +1,10 @@
 package routes
 
 import (
-	"example/easylist-api/routing/health"
-	"example/easylist-api/routing/items"
-	"example/easylist-api/routing/spaces"
-	"example/easylist-api/routing/users"
+	"easylist/routing/health"
+	"easylist/routing/items"
+	"easylist/routing/spaces"
+	"easylist/routing/users"
 	"os"
 
 	"github.com/gin-contrib/cors"

@@ -5,10 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"example/easylist-api/auth"
-	"example/easylist-api/mongodb"
-	"example/easylist-api/structs"
-	"example/easylist-api/validation"
+	"easylist/auth"
+	"easylist/mongodb"
+	"easylist/structs"
+	"easylist/validation"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
