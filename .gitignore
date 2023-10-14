@@ -1,5 +1,9 @@
 .env
 .env.example
+
+# Executables
+easylist
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
